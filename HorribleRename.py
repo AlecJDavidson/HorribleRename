@@ -1,32 +1,38 @@
-# Name of code: HorribleRename
+# Name of code: AutHorribleRename
 # Author of code: Alec J. Davidson
-# Version of the code and the date of it’s last revision: ver 1.10 10/24/19
+# Version of the code and the date of it’s last revision: ver 2.15 11/30/19
 # Summary/Goal of the code: This script will help manage your anime library
 # by renaming anime from HorribleSubs to an ideal format for Plex.
-# This will serve as the module responsible for reformatting HorribleSubs
-# content for AniName when it is complete.
+# This version will run automagically to cleanup my plex server's anime folder and all sub directories.
 
-import os # Imports the OS module allowing us to navigate the file system.
-import PTN # Allows the parsing of the raw files.
+import os	# Imports os for use of file system
+import PTN	# Allows the parsing of the raw files
 
-def HoribleRename(path=''): 									# Defines default arguments for primary variables.
-	path = input('Please enter the path to the target files: ') # Asks user to input the path to the video files and stores it in the path variable.
-	f_list = [] 												# Creates a list that stores the target files.
-	#end = len(f_list)
-	f_list = sorted(os.listdir(path)) 							# Fetches all files in the given directory and stores them in files.
-	#print(f_list) 												# Prints all the files in the list.
-	os.chdir(path) 												# Points to the target directory stored in the path variable.
-	print(os.getcwd()) 											# Prints the current working directory
-	count = -1 													# Starts count at -1 so that the first index is 0 in the loop.
-	for files in (f_list): 										# Loop to iterate a rename for each file in the directory.
-		count = count + 1 										# Iterates for each file in the directory
-		nameInput = f_list[count] 								# Iterates over how many files are in the list and uses that to keep from overwriting/deleting files.
-		name = PTN.parse(nameInput) 							# Parses torrent name
-		title = name['title'] 									# Title string
-		titleSplit = str(title).split('-', 1) 					# Splits the title even further
-		title = titleSplit[0] 									# Title text
-		epNum = titleSplit[1] 									# Episode number
-		container = name['container'] 							# File extention type
-		newTitle = (title+'-'+epNum+'.'+container) 				# Creates Plex friendly title
-		os.rename(files,newTitle) 								# Renames target files using new_name.
-HoribleRename() 												# Calls function.
+animeDir = '' # PATH TO ANIME DIR ON SERVER
+anime = []						# Creates a list for anime directories
+anime = os.listdir(animeDir)	# Stores anime directories in the list
+series_count = -1				# Keeps count of how many anime series are in the directory
+for series in anime:			# For loop to iterate over each series in the directory
+	series_count += 1			# Adds 1 for each series in the directory
+	print(anime[series_count])	# Prints the series name
+	series=[]					# Creates a list to store the series in.
+	series = sorted(os.listdir(animeDir+'/'+str(anime[series_count])))	# Stores each series in a list
+	season_count = -1													# Keeps count of how many seasons there are
+	for season in series:												# For loop to iterate over each season in the series directory
+		season_count += 1												# Adds 1 fore each season in the directory
+		print('  ',series[season_count])								# Prints the season
+		seasons=[]														# Creates a list for each season
+		seasons = sorted(os.listdir(animeDir+'/'+str(anime[series_count])+'/'+str(series[season_count]))) # Path to seasons
+		episode_count = -1						# Keeps count of how many episodes there are
+		for episodes in seasons:				# Fore loop to iterate over each episode in the season directory
+			print('    ',seasons[episode_count])# Prints the episode name
+			episode_count += 1					# Adds 1 for each episode in the season directory
+			name = seasons[episode_count]		# Episode name
+			info = PTN.parse(name) 				# Parses the name of the file
+			title = info['title'] 				# Title string from the parsed file
+			container = info['container'] 		# File extention type from the parsed file
+			title = (title+'.'+container)		# Edited title and final name for the file
+			if 'HorribleSubs' in name:			# Condition to find HorribleSubs in the file name
+				os.rename(episodes,title) 		# Renames target files using new_name.
+			else:
+				print('	','File has already been renamed')
